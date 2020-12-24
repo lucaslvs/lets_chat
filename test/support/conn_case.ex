@@ -17,6 +17,8 @@ defmodule LetsChatWeb.ConnCase do
 
   use ExUnit.CaseTemplate
 
+  alias Ecto.Adapters.SQL.Sandbox
+
   using do
     quote do
       # Import conveniences for testing with connections
@@ -32,10 +34,10 @@ defmodule LetsChatWeb.ConnCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(LetsChat.Repo)
+    :ok = Sandbox.checkout(LetsChat.Repo)
 
     unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(LetsChat.Repo, {:shared, self()})
+      Sandbox.mode(LetsChat.Repo, {:shared, self()})
     end
 
     {:ok, conn: Phoenix.ConnTest.build_conn()}
