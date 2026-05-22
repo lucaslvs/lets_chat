@@ -20,6 +20,7 @@ defmodule LetsChatWeb.ConnCase do
   using do
     quote do
       use LetsChatWeb, :verified_routes
+
       import LetsChatWeb.ConnCase
       import Phoenix.ConnTest
       import Plug.Conn
