@@ -1,5 +1,6 @@
 defmodule LetsChatWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :lets_chat
+
   import PhoenixVite.Plug
 
   # The session will be stored in the cookie and signed,

@@ -1,5 +1,5 @@
 import Config
-config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS
+
 config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
@@ -70,15 +70,17 @@ config :lets_chat, LetsChatWeb.Endpoint,
 # Enable dev routes for dashboard and mailbox
 config :lets_chat, dev_routes: true, token_signing_secret: "WQZQ83whpdWX0EUcAt27Y4Ay8oEBm7dB"
 
+config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS
+
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
+
+# Initialize plugs at runtime for faster development compilation
+config :phoenix, :plug_init_mode, :runtime
 
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
-
-# Initialize plugs at runtime for faster development compilation
-config :phoenix, :plug_init_mode, :runtime
 
 config :phoenix_live_view,
   # Include debug annotations and locations in rendered markup.

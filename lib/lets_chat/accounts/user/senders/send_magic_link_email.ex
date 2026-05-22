@@ -7,6 +7,7 @@ defmodule LetsChat.Accounts.User.Senders.SendMagicLinkEmail do
   use LetsChatWeb, :verified_routes
 
   import Swoosh.Email
+
   alias LetsChat.Mailer
 
   @impl true

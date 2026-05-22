@@ -1,7 +1,11 @@
 import Config
-config :lets_chat, token_signing_secret: "BYZgzCVzwOUUs/dAiu4epM/bfqRJnumu"
-config :bcrypt_elixir, log_rounds: 1
+
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
+
+config :bcrypt_elixir, log_rounds: 1
+
+# In test we don't send emails
+config :lets_chat, LetsChat.Mailer, adapter: Swoosh.Adapters.Test
 
 # Configure your database
 #
@@ -23,11 +27,7 @@ config :lets_chat, LetsChatWeb.Endpoint,
   secret_key_base: "cAYMFE1pHIFMjndZc4g4/8h4NiBPRnjXx97B15uNiszQZrXd3lairac92ktMNJh6",
   server: false
 
-# In test we don't send emails
-config :lets_chat, LetsChat.Mailer, adapter: Swoosh.Adapters.Test
-
-# Disable swoosh api client as it is only required for production adapters
-config :swoosh, :api_client, false
+config :lets_chat, token_signing_secret: "BYZgzCVzwOUUs/dAiu4epM/bfqRJnumu"
 
 # Print only warnings and errors during test
 config :logger, level: :warning
@@ -35,10 +35,13 @@ config :logger, level: :warning
 # Initialize plugs at runtime for faster test compilation
 config :phoenix, :plug_init_mode, :runtime
 
+# Sort query params output of verified routes for robust url comparisons
+config :phoenix,
+  sort_verified_routes_query_params: true
+
 # Enable helpful, but potentially expensive runtime checks
 config :phoenix_live_view,
   enable_expensive_runtime_checks: true
 
-# Sort query params output of verified routes for robust url comparisons
-config :phoenix,
-  sort_verified_routes_query_params: true
+# Disable swoosh api client as it is only required for production adapters
+config :swoosh, :api_client, false

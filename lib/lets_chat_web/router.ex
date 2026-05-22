@@ -1,9 +1,11 @@
 defmodule LetsChatWeb.Router do
   use LetsChatWeb, :router
-
   use AshAuthentication.Phoenix.Router
 
   import AshAuthentication.Plug.Helpers
+
+  alias Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+  alias LetsChat.Accounts.User
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -42,7 +44,7 @@ defmodule LetsChatWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
-    auth_routes AuthController, LetsChat.Accounts.User, path: "/auth"
+    auth_routes AuthController, User, path: "/auth"
     sign_out_route AuthController
 
     # Remove these if you'd like to use your own authentication views
@@ -52,25 +54,25 @@ defmodule LetsChatWeb.Router do
                   on_mount: [{LetsChatWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     LetsChatWeb.AuthOverrides,
-                    Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+                    DaisyUI
                   ]
 
     # Remove this if you do not want to use the reset password feature
     reset_route auth_routes_prefix: "/auth",
                 overrides: [
                   LetsChatWeb.AuthOverrides,
-                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
+                  DaisyUI
                 ]
 
     # Remove this if you do not use the confirmation strategy
-    confirm_route LetsChat.Accounts.User, :confirm_new_user,
+    confirm_route User, :confirm_new_user,
       auth_routes_prefix: "/auth",
-      overrides: [LetsChatWeb.AuthOverrides, Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI]
+      overrides: [LetsChatWeb.AuthOverrides, DaisyUI]
 
     # Remove this if you do not use the magic link strategy.
-    magic_sign_in_route(LetsChat.Accounts.User, :magic_link,
+    magic_sign_in_route(User, :magic_link,
       auth_routes_prefix: "/auth",
-      overrides: [LetsChatWeb.AuthOverrides, Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI]
+      overrides: [LetsChatWeb.AuthOverrides, DaisyUI]
     )
   end
 

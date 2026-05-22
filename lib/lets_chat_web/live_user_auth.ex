@@ -3,8 +3,9 @@ defmodule LetsChatWeb.LiveUserAuth do
   Helpers for authenticating users in LiveViews.
   """
 
-  import Phoenix.Component
   use LetsChatWeb, :verified_routes
+
+  import Phoenix.Component
 
   # This is used for nested liveviews to fetch the current user.
   # To use, place the following at the top of that liveview:

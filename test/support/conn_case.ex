@@ -19,15 +19,14 @@ defmodule LetsChatWeb.ConnCase do
 
   using do
     quote do
+      use LetsChatWeb, :verified_routes
+      import LetsChatWeb.ConnCase
+      import Phoenix.ConnTest
+      import Plug.Conn
       # The default endpoint for testing
       @endpoint LetsChatWeb.Endpoint
 
-      use LetsChatWeb, :verified_routes
-
       # Import conveniences for testing with connections
-      import Plug.Conn
-      import Phoenix.ConnTest
-      import LetsChatWeb.ConnCase
     end
   end
 

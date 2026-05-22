@@ -1,5 +1,4 @@
 import Config
-config :live_vue, ssr_module: LiveVue.SSR.QuickBEAM, ssr: true
 
 # Note we also include the path to a cache manifest
 # containing the digested version of static files. This
@@ -20,14 +19,16 @@ config :lets_chat, LetsChatWeb.Endpoint,
     ]
   ]
 
-# Configure Swoosh API Client
-config :swoosh, api_client: Swoosh.ApiClient.Req
-
-# Disable Swoosh Local Memory Storage
-config :swoosh, local: false
+config :live_vue, ssr_module: LiveVue.SSR.QuickBEAM, ssr: true
 
 # Do not print debug messages in production
 config :logger, level: :info
 
+# Configure Swoosh API Client
+config :swoosh, api_client: Swoosh.ApiClient.Req
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
+
+# Disable Swoosh Local Memory Storage
+config :swoosh, local: false

@@ -5,6 +5,8 @@ defmodule LetsChat.Application do
 
   use Application
 
+  alias LiveVue.SSR.QuickBEAM
+
   @impl true
   def start(_type, _args) do
     children = [
@@ -22,10 +24,11 @@ defmodule LetsChat.Application do
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: LetsChat.Supervisor]
+
     children =
       children ++
-        if(Application.get_env(:live_vue, :ssr_module) == LiveVue.SSR.QuickBEAM,
-          do: [LiveVue.SSR.QuickBEAM],
+        if(Application.get_env(:live_vue, :ssr_module) == QuickBEAM,
+          do: [QuickBEAM],
           else: []
         )
 

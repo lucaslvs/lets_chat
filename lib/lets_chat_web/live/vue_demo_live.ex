@@ -1,4 +1,5 @@
 defmodule LetsChatWeb.VueDemoLive do
+  @moduledoc false
   use LetsChatWeb, :live_view
 
   @impl true

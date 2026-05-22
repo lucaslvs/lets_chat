@@ -1,4 +1,5 @@
 defmodule LetsChat.Accounts.User do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :lets_chat,
     domain: LetsChat.Accounts,
@@ -74,8 +75,7 @@ defmodule LetsChat.Accounts.User do
       # Uses the information from the token to create or sign in the user
       change AshAuthentication.Strategy.MagicLink.SignInChange
 
-      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
-              strategy_name: :remember_me}
+      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange, strategy_name: :remember_me}
 
       metadata :token, :string do
         allow_nil? false

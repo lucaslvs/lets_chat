@@ -1,4 +1,5 @@
 defmodule LetsChat.Accounts.Token do
+  @moduledoc false
   use Ash.Resource,
     otp_app: :lets_chat,
     domain: LetsChat.Accounts,
