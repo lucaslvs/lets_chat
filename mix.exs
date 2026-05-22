@@ -10,6 +10,7 @@ defmodule LetsChat.MixProject do
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      usage_rules: usage_rules(),
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       consolidate_protocols: Mix.env() != :dev
@@ -46,6 +47,8 @@ defmodule LetsChat.MixProject do
       {:picosat_elixir, "~> 0.2"},
       {:sourceror, "~> 1.8", only: [:dev, :test]},
       {:usage_rules, "~> 1.0", only: [:dev]},
+      {:spark, ">= 0.0.0", only: [:dev], override: true},
+      {:reactor, ">= 0.0.0", only: [:dev], override: true},
       {:tidewave, "~> 0.5", only: [:dev]},
       {:live_debugger, "~> 1.0", only: [:dev]},
       {:ash_authentication_phoenix, "~> 2.0"},
@@ -83,6 +86,33 @@ defmodule LetsChat.MixProject do
   #     $ mix setup
   #
   # See the documentation for `Mix` for more info on aliases.
+  defp usage_rules do
+    [
+      file: "AGENTS.md",
+      usage_rules: [{:usage_rules, [sub_rules: []]}],
+      skills: [
+        location: ".agents/skills",
+        build: [
+          "ash-framework": [
+            description:
+              "Use this skill when working with Ash Framework or any of its extensions. Consult when making domain changes, features, or fixes involving resources, changesets, policies, or authentication.",
+            usage_rules: [:ash, ~r/^ash_/, :spark, :reactor, :igniter]
+          ],
+          "live-vue": [
+            description:
+              "Use this skill when working with LiveVue components, Vue.js integration in Phoenix LiveView, or client-side Vue code.",
+            usage_rules: [:live_vue]
+          ],
+          "phoenix-framework": [
+            description:
+              "Use this skill when working with Phoenix, LiveView, HEEx templates, routing, controllers, or any web layer code. Also includes Elixir and OTP best practices.",
+            usage_rules: [:phoenix, :elixir, :otp]
+          ]
+        ]
+      ]
+    ]
+  end
+
   defp aliases do
     [
       setup: ["deps.get", "ash.setup", "assets.setup", "assets.build", "run priv/repo/seeds.exs"],
