@@ -1,4 +1,5 @@
 import Config
+config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS
 config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
@@ -25,10 +26,8 @@ config :lets_chat, LetsChatWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "6E/Om8KDT9Mi/s0lGkv39uHGJvgWyMjw6OUsZS5UWCTYF1ydI407ISCDfOcpuFs/",
-  watchers: [
-    esbuild: {Esbuild, :install_and_run, [:lets_chat, ~w(--sourcemap=inline --watch)]},
-    tailwind: {Tailwind, :install_and_run, [:lets_chat, ~w(--watch)]}
-  ]
+  watchers: [vite: {PhoenixVite.Npm, :run, [:vite, ~w(dev)]}],
+  static_url: [host: "localhost", port: 5173]
 
 # ## SSL Support
 #

@@ -92,6 +92,7 @@ defmodule LetsChatWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: LetsChatWeb.Telemetry
+      live "/vue_demo", LetsChatWeb.VueDemoLive
       forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
