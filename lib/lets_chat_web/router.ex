@@ -26,6 +26,8 @@ defmodule LetsChatWeb.Router do
   scope "/", LetsChatWeb do
     pipe_through :browser
 
+    get "/session/guest", GuestSessionController, :create
+
     ash_authentication_live_session :authenticated_routes do
       # in each liveview, add one of the following at the top of the module:
       #
@@ -37,13 +39,14 @@ defmodule LetsChatWeb.Router do
       #
       # If an authenticated user must *not* be present:
       # on_mount {LetsChatWeb.LiveUserAuth, :live_no_user}
+
+      live "/", HomeLive, :index
     end
   end
 
   scope "/", LetsChatWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
     auth_routes AuthController, User, path: "/auth"
     sign_out_route AuthController
 

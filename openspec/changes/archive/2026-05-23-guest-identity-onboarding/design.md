@@ -28,9 +28,13 @@ This change establishes the identity foundation that every subsequent change dep
 
 ### 1. Home route is a LiveView, not a Controller
 
-`HomeLive` replaces `PageController` at `/`. Since Phoenix LiveView 1.0+, `put_session/3` is available inside LiveView, making a controller redirect for session persistence unnecessary. This keeps the pattern consistent with the rest of the app and enables the live avatar preview (`phx-change` → recompute initials) without a round-trip.
+`HomeLive` replaces `PageController` at `/`. The live avatar preview (`phx-change` → recompute initials) runs entirely in the LiveView without a round-trip.
 
-Alternative considered: keep a controller as a POST handler for the form and redirect back. Rejected — adds indirection with no benefit.
+Session persistence, however, requires an HTTP round-trip: the Plug session is a cookie, and `Set-Cookie` headers can only be written during a regular HTTP response cycle — not over a WebSocket. Because a LiveView operates via WebSocket after the initial mount, it cannot write to the Plug session directly.
+
+The implemented approach: on `"submit"`, `HomeLive` does a `Phoenix.LiveView.redirect/2` to `GuestSessionController`, a lightweight Plug controller that calls `put_session/3` and immediately redirects to `return_to`. This is the minimal HTTP detour needed to write the cookie.
+
+Alternative considered: keep a standalone POST controller as the form action. Rejected — would require a full page reload for the form rather than a LiveView redirect, losing the live avatar preview during validation.
 
 ### 2. Session structure: `{session_id: UUID, name: string}` only
 
@@ -92,14 +96,16 @@ When `src` is provided (authenticated user with Gravatar), renders `<img>`. When
 
 ```
 assigns:
-  :name          String.t()  — current input value, "" on mount
-  :return_to     String.t()  — path to navigate after submit, default "/rooms"
-  :current_user  User.t() | nil — from AshAuthentication session
+  :name             String.t()       — current input value, "" on mount
+  :return_to        String.t()       — path to navigate after submit, default "/rooms"
+  :error            String.t() | nil — inline validation message, nil when valid
+  :guest_session_id String.t()       — UUID, generated on mount if not yet in session
+  :current_user     User.t() | nil   — from AshAuthentication session
 ```
 
 Events:
-- `"validate"` (phx-change on form): updates `:name` assign, re-renders avatar preview
-- `"submit"` (phx-submit on form): calls `put_session/3`, then `push_navigate` to `:return_to`
+- `"validate"` (phx-change on form): updates `:name` assign, clears `:error`, re-renders avatar preview
+- `"submit"` (phx-submit on form): trims name; on blank sets `:error`; on valid redirects to `GuestSessionController` which writes the session and redirects to `:return_to`
 
 On mount, if `current_user` is present, immediately `push_navigate` to `:return_to` — authenticated users skip onboarding. If `session["guest_name"]` is already set (returning guest), same redirect.
 

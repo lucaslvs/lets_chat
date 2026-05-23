@@ -477,6 +477,66 @@ defmodule LetsChatWeb.CoreComponents do
     )
   end
 
+  @avatar_colors ["primary", "secondary", "accent", "info", "success", "warning", "error"]
+
+  def avatar_initials(name) when is_binary(name) do
+    words = name |> String.trim() |> String.split()
+
+    [List.first(words), List.last(words)]
+    |> Enum.reject(&is_nil/1)
+    |> Enum.uniq()
+    |> Enum.map_join(&String.slice(&1, 0, 1))
+    |> String.upcase()
+  end
+
+  def avatar_color(name) when is_binary(name) do
+    Enum.at(@avatar_colors, :erlang.phash2(name, length(@avatar_colors)))
+  end
+
+  defp avatar_size_class(:xs), do: "w-6 h-6"
+  defp avatar_size_class(:sm), do: "w-8 h-8"
+  defp avatar_size_class(:md), do: "w-10 h-10"
+  defp avatar_size_class(:lg), do: "w-14 h-14"
+  defp avatar_size_class(_), do: "w-10 h-10"
+
+  defp avatar_text_class(:xs), do: "text-xs"
+  defp avatar_text_class(:sm), do: "text-xs"
+  defp avatar_text_class(:md), do: "text-sm"
+  defp avatar_text_class(:lg), do: "text-base"
+  defp avatar_text_class(_), do: "text-sm"
+
+  defp avatar_color_class("primary"), do: "bg-primary text-primary-content"
+  defp avatar_color_class("secondary"), do: "bg-secondary text-secondary-content"
+  defp avatar_color_class("accent"), do: "bg-accent text-accent-content"
+  defp avatar_color_class("info"), do: "bg-info text-info-content"
+  defp avatar_color_class("success"), do: "bg-success text-success-content"
+  defp avatar_color_class("warning"), do: "bg-warning text-warning-content"
+  defp avatar_color_class("error"), do: "bg-error text-error-content"
+  defp avatar_color_class(_), do: "bg-neutral text-neutral-content"
+
+  attr :name, :string, required: true
+  attr :src, :string, default: nil
+  attr :size, :atom, default: :md
+  attr :class, :string, default: ""
+
+  def avatar(assigns) do
+    assigns =
+      assigns
+      |> assign(:size_class, avatar_size_class(assigns.size))
+      |> assign(:text_class, avatar_text_class(assigns.size))
+      |> assign(:color_class, avatar_color_class(avatar_color(assigns.name)))
+      |> assign(:initials, avatar_initials(assigns.name))
+
+    ~H"""
+    <div class={["avatar", @src == nil && "avatar-placeholder", @class]}>
+      <div class={[@size_class, "rounded-full", @src == nil && @color_class]}>
+        <img :if={@src} src={@src} alt={@name} class="rounded-full" />
+        <span :if={@src == nil} class={@text_class}>{@initials}</span>
+      </div>
+    </div>
+    """
+  end
+
   @doc """
   Translates an error message using gettext.
   """
