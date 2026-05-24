@@ -31,6 +31,7 @@ lets_chat-*.tar
 # Symlinks to .agents and AGENTS.md (source of truth)
 /.claude
 /CLAUDE.md
+/.mcp.json
 
 # Handoff documents (session context, not tracked)
 /HANDOFF.md
