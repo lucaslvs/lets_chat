@@ -41,6 +41,8 @@ defmodule LetsChatWeb.Router do
       # on_mount {LetsChatWeb.LiveUserAuth, :live_no_user}
 
       live "/", HomeLive, :index
+      live "/rooms", LobbyLive, :index
+      live "/rooms/:slug", RoomLive, :show
     end
   end
 

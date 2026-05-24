@@ -1,4 +1,10 @@
-## ADDED Requirements
+## Purpose
+
+Defines the Rooms capability: the `LetsChat.Chat` domain and `Room` resource, slug generation, the Lobby LiveView at `/rooms`, the Room shell LiveView at `/rooms/:slug`, the room creation modal, and the auth guard protecting both LiveViews.
+
+---
+
+## Requirements
 
 ### Requirement: Room resource with attributes
 The system SHALL define an Ash resource `LetsChat.Chat.Room` within the `LetsChat.Chat` domain, with the following attributes: `id` (UUID primary key), `name` (string, required, non-empty), `slug` (string, required, unique, URL-safe identifier), `visibility` (atom enum `[:public, :private]`, default `:public`), `owner_session_id` (string, allow nil), `owner_user_id` (UUID, allow nil, references users with `on_delete: :nothing`), and `inserted_at` (AshPostgres.Timestamptz, auto-set).
@@ -62,9 +68,9 @@ The system SHALL validate slug availability in real-time via `phx-change` with `
 - **WHEN** a user types a name whose derived slug does not exist in the database
 - **THEN** the form shows a "✓ available" indicator below the slug preview
 
-#### Scenario: Taken slug shows negative feedback
+#### Scenario: Taken slug shows negative feedback and blocks submission
 - **WHEN** a user types a name whose derived slug already exists in the database
-- **THEN** the form shows a "✗ already taken" indicator below the slug preview
+- **THEN** the form shows a "✗ already taken" indicator below the slug preview and the submit button is disabled
 
 #### Scenario: Availability check uses no suffix
 - **WHEN** the slug availability check is performed
@@ -101,7 +107,7 @@ The system SHALL define an Ash domain `LetsChat.Chat` using `Ash.Domain` with `o
 ---
 
 ### Requirement: Lobby LiveView at /rooms
-The system SHALL provide a LiveView at `/rooms` (`LobbyLive`) that lists all public rooms ordered by `inserted_at DESC`. Each room card SHALL display the room `name`, `slug`, and a relative timestamp (e.g., "5 minutes ago"). When no rooms exist, the LiveView SHALL render an empty state with a CTA button "Create the first room" that opens the creation modal. The LiveView SHALL NOT display active/online member counts (deferred to Change 4).
+The system SHALL provide a LiveView at `/rooms` (`LobbyLive`) that lists all public rooms ordered by `inserted_at DESC`. Each room card SHALL display the room `name`, `slug`, and a relative timestamp (e.g., "5 minutes ago"). When no rooms exist, the LiveView SHALL render an empty state with an explanatory text message directing users to the "Nova sala" header button; no secondary CTA button is present. The LiveView SHALL NOT display active/online member counts (deferred to Change 4). The LiveView SHALL render both `:info` and `:error` flash messages via `<.flash>` components and SHALL auto-dismiss them after 5 seconds using `Process.send_after/3` in the connected mount.
 
 #### Scenario: Rooms are listed in reverse chronological order
 - **WHEN** multiple public rooms exist
@@ -109,7 +115,7 @@ The system SHALL provide a LiveView at `/rooms` (`LobbyLive`) that lists all pub
 
 #### Scenario: Empty state is shown when no rooms exist
 - **WHEN** no rooms are in the database
-- **THEN** the lobby renders an empty state with a "Create the first room" CTA
+- **THEN** the lobby renders an empty state with an explanatory message directing users to the "Nova sala" header button (no secondary CTA button)
 
 #### Scenario: Each card shows name, slug, and relative timestamp
 - **WHEN** rooms are listed in the lobby
@@ -126,7 +132,7 @@ The system SHALL provide a LiveView at `/rooms` (`LobbyLive`) that lists all pub
 ---
 
 ### Requirement: Room creation modal on /rooms
-The system SHALL provide a modal on the Lobby LiveView that allows users to create a new room. The modal SHALL contain a name input field and a read-only slug preview updated on `phx-change`. The modal SHALL be opened by clicking "New room" in the lobby header. The URL `/rooms?new=true` SHALL open the modal directly on mount (deep-link support). After successful creation the LiveView SHALL redirect to `/rooms/:slug` via `push_navigate`.
+The system SHALL provide a modal on the Lobby LiveView that allows users to create a new room. The modal SHALL contain a name input field (auto-focused on open) and a read-only slug preview updated on `phx-change`. The modal SHALL be opened by clicking "New room" in the lobby header. The URL `/rooms?new=true` SHALL open the modal directly on mount (deep-link support). Clicking outside the modal SHALL close it. After successful creation the LiveView SHALL redirect to `/rooms/:slug` via `push_navigate`.
 
 #### Scenario: New room button opens modal
 - **WHEN** a user clicks "New room" in the lobby header
@@ -140,6 +146,10 @@ The system SHALL provide a modal on the Lobby LiveView that allows users to crea
 - **WHEN** a user types in the room name input
 - **THEN** the slug preview below the input reflects the derived slug in real-time (debounced 300ms)
 
+#### Scenario: Clicking outside modal closes it
+- **WHEN** a user clicks outside the modal box (on the backdrop)
+- **THEN** the modal closes without any navigation
+
 #### Scenario: Successful creation redirects to room
 - **WHEN** a user submits a valid room name
 - **THEN** the room is created and the browser navigates to `/rooms/:slug` for the new room
@@ -151,12 +161,13 @@ The system SHALL provide a modal on the Lobby LiveView that allows users to crea
 | New room button opens modal | LiveViewTest | `LobbyLiveTest` |
 | Deep-link opens modal on mount | LiveViewTest | `LobbyLiveTest` |
 | Slug preview updates as user types | LiveViewTest | `LobbyLiveTest` |
+| Clicking outside modal closes it | LiveViewTest | `LobbyLiveTest` |
 | Successful creation redirects to room | LiveViewTest | `LobbyLiveTest` |
 
 ---
 
 ### Requirement: Room shell LiveView at /rooms/:slug
-The system SHALL provide a LiveView at `/rooms/:slug` (`RoomLive`) that loads the Room by its slug on mount and renders a complete layout: a header with the room name and a "Leave" button, an empty message area with placeholder text, a participant sidebar placeholder, and a message input that is visible but `disabled`. If the slug does not match any room, the LiveView SHALL redirect to `/rooms` with a flash error message.
+The system SHALL provide a LiveView at `/rooms/:slug` (`RoomLive`) that loads the Room by its slug on mount and renders a complete layout: a header with the room name and a "← Salas" link that navigates directly to `/rooms`, an empty message area with placeholder text, a participant sidebar placeholder, and a message input that is visible but `disabled`. If the slug does not match any room, the LiveView SHALL redirect to `/rooms` with a flash error message.
 
 #### Scenario: Room shell renders with correct room name
 - **WHEN** a user navigates to `/rooms/:slug` for an existing room
@@ -168,10 +179,10 @@ The system SHALL provide a LiveView at `/rooms/:slug` (`RoomLive`) that loads th
 
 #### Scenario: Unknown slug redirects to lobby
 - **WHEN** a user navigates to `/rooms/nonexistent-slug`
-- **THEN** the LiveView redirects to `/rooms` and displays a flash error
+- **THEN** the LiveView redirects to `/rooms` via `push_navigate` with a flash error ("Sala não encontrada.") in the navigation payload; the flash is displayed in the lobby and auto-dismissed after 5 seconds
 
 #### Scenario: Leave button navigates back to lobby
-- **WHEN** a user clicks the "Leave" button in the room header
+- **WHEN** a user clicks the "← Salas" link in the room header
 - **THEN** the browser navigates to `/rooms`
 
 ## Test Requirements

@@ -1,0 +1,77 @@
+<div class="min-h-screen p-4 max-w-5xl mx-auto">
+  <.flash kind={:info} flash={@flash} />
+  <.flash kind={:error} flash={@flash} />
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold font-brand">Salas</h1>
+    <button phx-click="open_modal" class="btn btn-primary min-h-[44px]">
+      Nova sala
+    </button>
+  </div>
+
+  <%= if @rooms == [] do %>
+    <div class="text-center py-16">
+      <p class="text-base-content/60">
+        Nenhuma sala criada ainda. Use o botão <strong>Nova sala</strong> acima para começar.
+      </p>
+    </div>
+  <% else %>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <%= for room <- @rooms do %>
+        <.link
+          navigate={~p"/rooms/#{room.slug}"}
+          class="card bg-base-200 hover:bg-base-300 transition-colors cursor-pointer"
+        >
+          <div class="card-body min-h-[44px]">
+            <h2 class="card-title text-base">{room.name}</h2>
+            <p class="text-sm font-mono text-base-content/60">{room.slug}</p>
+            <p class="text-xs text-base-content/40">{time_ago(room.inserted_at)}</p>
+          </div>
+        </.link>
+      <% end %>
+    </div>
+  <% end %>
+
+  <%= if @show_modal do %>
+    <div class="modal modal-open" role="dialog" phx-click="close_modal">
+      <div
+        class="modal-box"
+        onclick="event.stopPropagation()"
+        phx-mounted={JS.focus(to: "#room_name")}
+      >
+        <h3 class="font-bold text-lg mb-4">Nova sala</h3>
+        <.form for={@form} phx-change="validate" phx-submit="create_room">
+          <.input
+            field={@form[:name]}
+            label="Nome da sala"
+            placeholder="Ex: Elixir Study Group"
+            phx-debounce="300"
+            class="w-full input min-h-[44px]"
+          />
+          <div class="mt-1 min-h-[20px] text-sm">
+            <%= if @slug_preview do %>
+              <span class="text-base-content/60">URL: /rooms/</span><span class="font-mono">{@slug_preview}</span>
+              <%= if @slug_available == true do %>
+                <span class="text-success ml-2">✓ disponível</span>
+              <% end %>
+              <%= if @slug_available == false do %>
+                <span class="text-error ml-2">✗ já em uso</span>
+              <% end %>
+            <% end %>
+          </div>
+          <div class="modal-action">
+            <button type="button" phx-click="close_modal" class="btn min-h-[44px]">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={@slug_available == false}
+              class="btn btn-primary min-h-[44px]"
+            >
+              Criar sala
+            </button>
+          </div>
+        </.form>
+      </div>
+    </div>
+  <% end %>
+</div>

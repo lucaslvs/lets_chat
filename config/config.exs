@@ -44,7 +44,7 @@ config :lets_chat, LetsChatWeb.Endpoint,
 config :lets_chat,
   ecto_repos: [LetsChat.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [LetsChat.Accounts],
+  ash_domains: [LetsChat.Accounts, LetsChat.Chat],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 config :live_vue, ssr: true, shared_props: []

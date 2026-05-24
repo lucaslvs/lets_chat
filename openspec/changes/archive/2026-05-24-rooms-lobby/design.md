@@ -66,7 +66,7 @@ The creation modal uses `phx-change` with `debounce="300"` on the name input. Th
 2. Calls a `check_slug_available/1` helper that runs a lightweight `Ash.count` or `exists?` query against `Room`.
 3. Assigns `@slug_available` (boolean) to show `✓ available` or `✗ already taken` inline below the slug preview.
 
-No slug uniqueness suffix is applied during validation — the suffix is only applied on actual creation. This means the displayed "available" status may briefly become stale if another user creates the same slug between check and submit, which is acceptable; the server will resolve any collision.
+No slug uniqueness suffix is applied during validation — the suffix is only applied on actual creation. When the availability check returns "taken", the submit button is disabled, preventing the user from submitting a room with a conflicting name. The user must change the name to proceed. Note: a race condition remains possible (two users checking simultaneously), but the unique index on `rooms.slug` enforces integrity at the DB level as a final safeguard.
 
 ### 5. Lobby LiveView design
 
@@ -80,13 +80,25 @@ The modal opens without page navigation (no live patch needed) via `@show_modal 
 
 After successful creation, the LiveView redirects to `/rooms/:slug` via `push_navigate`.
 
-### 6. Room shell LiveView design
+### 6. Flash rendering and auto-dismiss in LobbyLive
+
+The root layout (`root.html.heex`) renders only `@inner_content` with no flash output. To display flash messages in the lobby, `<.flash kind={:info} flash={@flash} />` and `<.flash kind={:error} flash={@flash} />` are placed at the top of `lobby_live.html.heex`.
+
+Flash auto-dismisses after 5 seconds via `Process.send_after(self(), :clear_flash, 5_000)` scheduled in `mount/3` during the connected phase only (`connected?(socket)` guard). `handle_info(:clear_flash, socket)` calls `clear_flash(socket)`. Scheduling in `mount` (not `handle_params`) ensures a single timer per LiveView lifecycle regardless of in-LiveView navigation.
+
+For the invalid-slug redirect, `push_navigate` (not `redirect`) is used with `put_flash` so the flash is embedded in the LiveView navigation payload and available in the connected phase of the target LiveView — plain `redirect` causes the flash to be consumed during the dead render and lost when the socket connects.
+
+**Alternatives considered:**
+- Auto-dismiss via CSS animation — rejected; cannot notify the server to clear `socket.assigns.flash`, causing the flash to reappear on re-renders.
+- URL query param (`?flash_error=…`) — rejected; the flash would reappear on page refresh.
+
+### 7. Room shell LiveView design
 
 `RoomLive` at `/rooms/:slug` renders a complete layout — header with room name and "Leave" button, empty message area with placeholder text, participant sidebar placeholder, and a message input that is `disabled`. The disabled input is intentional: it documents that the feature exists but is not yet wired up, avoiding layout rework in Change 3.
 
 The LiveView loads the `Room` via the `get_by_slug` action on mount. If the slug does not exist, it redirects to `/rooms` with a flash error.
 
-### 7. Routing and auth guard
+### 8. Routing and auth guard
 
 Both LiveViews are nested inside the existing `ash_authentication_live_session` scope in `router.ex`. The `require_guest_name` plug/hook from `LiveUserAuth` is reused to ensure a guest session exists before entering either LiveView; unauthenticated visitors are redirected to `/?return_to=<path>`.
 

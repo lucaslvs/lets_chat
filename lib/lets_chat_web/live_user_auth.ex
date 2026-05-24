@@ -38,7 +38,7 @@ defmodule LetsChatWeb.LiveUserAuth do
     end
   end
 
-  def on_mount(:require_guest_name, _params, session, socket) do
+  def on_mount(:require_guest_name, params, session, socket) do
     current_user = socket.assigns[:current_user]
     guest_name = session["guest_name"]
 
@@ -46,9 +46,9 @@ defmodule LetsChatWeb.LiveUserAuth do
       {:cont, socket}
     else
       current_path =
-        case socket.host_uri do
-          %URI{path: path} when is_binary(path) -> path
-          _ -> "/rooms"
+        case params do
+          %{"slug" => slug} -> ~p"/rooms/#{slug}"
+          _ -> ~p"/rooms"
         end
 
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/?#{[return_to: current_path]}")}
