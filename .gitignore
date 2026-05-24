@@ -41,3 +41,6 @@ node_modules/
 
 # Elixir Language Server
 /.elixir_ls/
+
+# Superset
+/.superset/
