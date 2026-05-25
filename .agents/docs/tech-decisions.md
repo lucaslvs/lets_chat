@@ -17,4 +17,4 @@ description: Architectural and library adoption decisions for Let's Chat. Consul
 - Existing HEEx templates → leave as-is unless explicitly asked to migrate
 - When asked to migrate a screen → convert the full template to Vue
 
-Consult `.agents/docs/design-system.md` for tokens and component specs when building Vue UI.
+Consult [design system](.agents/docs/design-system.md) for tokens and component specs when building Vue UI.

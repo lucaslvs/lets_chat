@@ -96,7 +96,7 @@ defmodule LetsChat.MixProject do
     [
       file: "AGENTS.md",
       usage_rules: [
-        {:usage_rules, [sub_rules: [:elixir, :otp]]},
+        {:usage_rules, [sub_rules: [:elixir, :otp], link: :markdown]},
         {:ash, link: :markdown},
         {:ash_authentication, link: :markdown},
         {:ash_phoenix, link: :markdown},
