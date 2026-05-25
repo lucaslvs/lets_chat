@@ -90,26 +90,17 @@ defmodule LetsChat.MixProject do
   defp usage_rules do
     [
       file: "AGENTS.md",
-      usage_rules: [{:usage_rules, [sub_rules: []]}],
-      skills: [
-        location: ".agents/skills",
-        build: [
-          "ash-framework": [
-            description:
-              "Use this skill when working with Ash Framework or any of its extensions. Consult when making domain changes, features, or fixes involving resources, changesets, policies, or authentication.",
-            usage_rules: [:ash, ~r/^ash_/, :spark, :reactor, :igniter]
-          ],
-          "live-vue": [
-            description:
-              "Use this skill when working with LiveVue components, Vue.js integration in Phoenix LiveView, or client-side Vue code.",
-            usage_rules: [:live_vue]
-          ],
-          "phoenix-framework": [
-            description:
-              "Use this skill when working with Phoenix, LiveView, HEEx templates, routing, controllers, or any web layer code. Also includes Elixir and OTP best practices.",
-            usage_rules: [:phoenix, :elixir, :otp]
-          ]
-        ]
+      usage_rules: [
+        {:usage_rules, [sub_rules: [:elixir, :otp]]},
+        {:ash, link: :markdown},
+        {:ash_authentication, link: :markdown},
+        {:ash_phoenix, link: :markdown},
+        {:ash_postgres, link: :markdown},
+        {:phoenix, link: :markdown},
+        {:igniter, link: :markdown},
+        {:live_vue, link: :markdown},
+        {:reactor, link: :markdown},
+        {:spark, link: :markdown}
       ]
     ]
   end
