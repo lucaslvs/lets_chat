@@ -25,6 +25,8 @@ ln -s AGENTS.md           CLAUDE.md
 
 The generated `.claude/` and `.mcp.json` are git-ignored, so each developer runs this once locally.
 
+`AGENTS.md` has a managed section (between `<!-- usage-rules-start -->` and `<!-- usage-rules-end -->`) that is auto-generated from dependency usage rules — never edit it manually. After upgrading dependencies, run `mix usage_rules.sync --yes` to keep it up to date.
+
 ## Learn more
 
 * Official website: https://www.phoenixframework.org/
