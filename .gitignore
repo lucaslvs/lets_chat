@@ -27,6 +27,12 @@ lets_chat-*.tar
 
 # Ignore assets that are produced by build tools.
 /priv/static/*
+# Keep the stub Vite manifest so tests don't require a Vite build
+!/priv/static/.vite/
+!/priv/static/.vite/manifest.json
+
+# Dialyzer PLTs (built by CI and locally, not tracked)
+/priv/plts/
 
 # Symlinks to .agents and AGENTS.md (source of truth)
 /.claude

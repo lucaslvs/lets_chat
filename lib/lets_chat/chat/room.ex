@@ -94,14 +94,16 @@ defmodule LetsChat.Chat.Room do
   end
 
   defp resolve_unique_slug(base_slug) do
-    if slug_exists?(base_slug) do
-      Enum.find_value(2..999, fn n ->
-        candidate = "#{base_slug}-#{n}"
-        if !slug_exists?(candidate), do: candidate
-      end) || "#{base_slug}-2"
-    else
-      base_slug
-    end
+    if slug_exists?(base_slug), do: find_available_slug(base_slug), else: base_slug
+  end
+
+  defp find_available_slug(base_slug) do
+    Enum.find_value(2..999, &candidate_slug(base_slug, &1)) || "#{base_slug}-2"
+  end
+
+  defp candidate_slug(base_slug, n) do
+    candidate = "#{base_slug}-#{n}"
+    if !slug_exists?(candidate), do: candidate
   end
 
   defp slug_exists?(slug) do

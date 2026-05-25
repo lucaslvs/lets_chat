@@ -1,6 +1,7 @@
 defmodule LetsChat.Chat.RoomTest do
   use LetsChat.DataCase, async: true
 
+  alias Ash.Resource.Info
   alias LetsChat.Chat.Room
 
   # 8.1 — Room is created with valid name
@@ -42,7 +43,7 @@ defmodule LetsChat.Chat.RoomTest do
   test "no update actions are defined on Room" do
     update_actions =
       Room
-      |> Ash.Resource.Info.actions()
+      |> Info.actions()
       |> Enum.filter(fn action -> action.type == :update end)
 
     assert update_actions == []

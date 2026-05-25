@@ -11,6 +11,7 @@ defmodule LetsChat.MixProject do
       aliases: aliases(),
       deps: deps(),
       usage_rules: usage_rules(),
+      dialyzer: [plt_local_path: "priv/plts", ignore_warnings: ".dialyzer_ignore.exs"],
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       consolidate_protocols: Mix.env() != :dev
@@ -77,7 +78,11 @@ defmodule LetsChat.MixProject do
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.2.0"},
       {:bandit, "~> 1.5"},
-      {:styler, "~> 1.11", only: [:dev, :test], runtime: false}
+      {:styler, "~> 1.11", only: [:dev, :test], runtime: false},
+      {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
 

@@ -1,0 +1,24 @@
+[tools]
+erlang = "27.3"
+elixir = "1.18.3-otp-27"
+node = "22.14.0"
+
+[env]
+KERL_CONFIGURE_OPTIONS = "--without-javac --with-ssl=$(brew --prefix openssl)"
+KERL_BUILD_DOCS = "yes"
+ERL_AFLAGS = "-kernel shell_history enabled"
+
+[tasks.setup]
+run = "mix setup"
+
+[tasks.server]
+run = "mix phx.server"
+
+[tasks.test]
+run = "mix test"
+
+[tasks.precommit]
+run = "mix precommit"
+
+[hooks]
+postinstall = "mix deps.get"
