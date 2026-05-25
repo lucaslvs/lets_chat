@@ -33,6 +33,6 @@
 ## 4. Verificação
 
 - [x] 4.1 Rodar `mix precommit` localmente e confirmar que todos os checks passam
-- [ ] 4.2 Fazer push para um branch de teste e verificar que o workflow é disparado no GitHub Actions
-- [ ] 4.3 Confirmar que todos os steps do CI passam no primeiro run (exceto potencial lentidão do cold start)
-- [ ] 4.4 Confirmar que o segundo run é significativamente mais rápido (cache hit para deps, _build e PLT)
+- [x] 4.2 Fazer push para um branch de teste e verificar que o workflow é disparado no GitHub Actions
+- [x] 4.3 Confirmar que todos os steps do CI passam no primeiro run (exceto potencial lentidão do cold start)
+- [x] 4.4 Confirmar que o segundo run é significativamente mais rápido (cache hit para deps, _build e PLT)
