@@ -89,7 +89,7 @@ jobs:
         run: mix credo --strict
 
       - name: Sobelow security analysis
-        run: mix sobelow --skip
+        run: mix sobelow --skip --exit Low
 
       - name: Dialyzer
         run: mix dialyzer
