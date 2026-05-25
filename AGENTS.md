@@ -25,6 +25,10 @@ Use the `project_eval` Tidewave tool to execute code in the running instance of 
 
 Always use Ash concepts; almost never use Ecto concepts directly. Think hard about the "Ash way" to do things. If unsure, look for information in the rules & docs of Ash and associated packages.
 
+## Vue First
+
+New UI components and pages must be built with Vue via LiveVue — not HEEx. HEEx is for layouts and minimal wrappers only. Existing HEEx templates stay as-is unless explicitly asked to migrate. Consult `.agents/docs/tech-decisions.md` before building any new feature.
+
 ## ALWAYS Research, NEVER Assume
 
 Always use `mix usage_rules.search_docs` or the `package_docs_search` Tidewave MCP tool to find relevant documentation before beginning work.
