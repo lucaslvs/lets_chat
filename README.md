@@ -1,13 +1,60 @@
 # LetsChat
 
-To start your Phoenix server:
+A real-time chat application built with Phoenix 1.8, Ash Framework 3.0, AshPostgres, and live_vue.
 
-* Run `mix setup` to install and setup dependencies
-* Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+## Development
+
+### Prerequisites
+
+- [mise](https://mise.jdx.dev/) for runtime version management
+
+### Getting started
+
+```sh
+# Install Erlang 27.3, Elixir 1.18.3-otp-27, and Node.js 22.14.0
+# (also runs mix deps.get automatically via postinstall hook)
+mise install
+
+# Create and migrate the database, compile assets
+mise run setup
+```
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+### mise tasks
+
+| Task | Command | Description |
+|------|---------|-------------|
+| `setup` | `mise run setup` | Install deps, create and migrate the database, compile assets |
+| `server` | `mise run server` | Start the Phoenix dev server |
+| `test` | `mise run test` | Run the test suite |
+| `precommit` | `mise run precommit` | Run all quality checks before committing |
+
+All tasks are also available via their `mix` equivalents (e.g. `mix phx.server`).
+
+## CI / Code Quality
+
+Every push and pull request to `main` runs the full CI pipeline on GitHub Actions. Steps run in order, from fastest to slowest, so trivial failures surface early:
+
+| Step | Command |
+|------|---------|
+| Compile | `mix compile --warnings-as-errors` |
+| Formatting | `mix format --check-formatted` |
+| Unused deps | `mix deps.unlock --check-unused` |
+| Hex audit | `mix hex.audit` |
+| Security audit | `mix deps.audit` |
+| Credo (strict) | `mix credo --strict` |
+| Sobelow | `mix sobelow --skip --exit Low` |
+| Dialyzer | `mix dialyzer` |
+| Tests | `mix test` |
+
+Run the same checks locally before pushing:
+
+```sh
+mix precommit
+```
+
+> **Note:** Node.js / Vite assets are not built in CI. `live_vue` uses `ssr_module: nil` in the test env, so no JS runtime is needed. If tests that require compiled Vue SSR assets are added in the future, a build step will need to be added.
 
 ## Claude Code setup
 
