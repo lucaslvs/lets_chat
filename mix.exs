@@ -11,6 +11,7 @@ defmodule LetsChat.MixProject do
       aliases: aliases(),
       deps: deps(),
       usage_rules: usage_rules(),
+      dialyzer: [plt_local_path: "priv/plts", ignore_warnings: ".dialyzer_ignore.exs"],
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       consolidate_protocols: Mix.env() != :dev

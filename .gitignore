@@ -31,6 +31,9 @@ lets_chat-*.tar
 !/priv/static/.vite/
 !/priv/static/.vite/manifest.json
 
+# Dialyzer PLTs (built by CI and locally, not tracked)
+/priv/plts/
+
 # Symlinks to .agents and AGENTS.md (source of truth)
 /.claude
 /CLAUDE.md
