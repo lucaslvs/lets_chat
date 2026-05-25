@@ -79,9 +79,9 @@ defmodule LetsChat.MixProject do
       {:bandit, "~> 1.5"},
       {:styler, "~> 1.11", only: [:dev, :test], runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
-      {:sobelow, "~> 0.13", only: [:dev], runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
-      {:mix_audit, "~> 2.0", only: [:dev], runtime: false}
+      {:sobelow, "~> 0.13", only: [:dev, :test], runtime: false},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
+      {:mix_audit, "~> 2.0", only: [:dev, :test], runtime: false}
     ]
   end
 
