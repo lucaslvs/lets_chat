@@ -30,6 +30,9 @@ export default defineConfig({
   // LV Colocated JS and Hooks
   // https://hexdocs.pm/phoenix_live_view/Phoenix.LiveView.ColocatedJS.html#module-internals
   resolve: {
+    // Force vue to always resolve from assets/node_modules even when imported
+    // from symlinked deps (e.g. deps/live_vue) during SSR build with noExternal: true
+    dedupe: ["vue"],
     alias: {
       "@": ".",
       "phoenix-colocated": `${process.env.MIX_BUILD_PATH}/phoenix-colocated`,
