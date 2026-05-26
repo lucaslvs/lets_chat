@@ -1,9 +1,9 @@
 [
   exit: "low",
   skip: true,
-  # Config.CSP is a false positive: put_secure_browser_headers is in the pipeline,
-  # and put_csp_headers overrides the content-security-policy header at runtime
-  # with environment-aware origins. Sobelow's static analysis cannot trace through
-  # the private function to see that the CSP is always set.
-  ignore: ["Config.CSP"]
+  # Config.Headers and Config.CSP are false positives: put_csp_headers calls
+  # put_secure_browser_headers/2 with a runtime content-security-policy header,
+  # setting all secure browser headers in a single call. Sobelow's static analysis
+  # cannot trace through private functions to confirm this.
+  ignore: ["Config.Headers", "Config.CSP"]
 ]

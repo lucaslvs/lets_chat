@@ -20,7 +20,7 @@ defmodule LetsChatWeb.Router do
         "connect-src 'self'#{extra}; " <>
         "frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
 
-    put_resp_header(conn, "content-security-policy", csp)
+    put_secure_browser_headers(conn, %{"content-security-policy" => csp})
   end
 
   pipeline :browser do
@@ -29,7 +29,6 @@ defmodule LetsChatWeb.Router do
     plug :fetch_live_flash
     plug :put_root_layout, html: {LetsChatWeb.Layouts, :root}
     plug :protect_from_forgery
-    plug :put_secure_browser_headers
     plug :put_csp_headers
     plug :load_from_session
   end
