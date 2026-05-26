@@ -1,1 +1,9 @@
-[exit: "low", skip: true]
+[
+  exit: "low",
+  skip: true,
+  # Config.CSP is a false positive: put_secure_browser_headers is in the pipeline,
+  # and put_csp_headers overrides the content-security-policy header at runtime
+  # with environment-aware origins. Sobelow's static analysis cannot trace through
+  # the private function to see that the CSP is always set.
+  ignore: ["Config.CSP"]
+]
