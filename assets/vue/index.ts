@@ -1,3 +1,4 @@
+import "vite/modulepreload-polyfill"
 import { h, type Component } from "vue"
 import { createLiveVue, findComponent, type LiveHook, type ComponentMap } from "live_vue"
 

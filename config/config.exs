@@ -58,7 +58,7 @@ config :logger, :default_formatter,
 config :phoenix, :json_library, Jason
 
 config :phoenix_vite, PhoenixVite.Npm,
-  assets: [args: [], cd: __DIR__],
+  assets: [args: [], cd: Path.expand("../assets", __DIR__)],
   vite: [
     args: ~w(exec -- vite),
     cd: Path.expand("../assets", __DIR__),

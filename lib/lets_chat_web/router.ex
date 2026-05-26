@@ -7,18 +7,29 @@ defmodule LetsChatWeb.Router do
   alias Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
   alias LetsChat.Accounts.User
 
+  defp put_csp_headers(conn, _opts) do
+    extra = :lets_chat |> Application.get_env(:csp_extra_origins, []) |> Enum.join(" ")
+    extra = if extra == "", do: "", else: " " <> extra
+
+    csp =
+      "default-src 'self'; " <>
+        "script-src 'self' 'unsafe-inline'#{extra}; " <>
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com#{extra}; " <>
+        "font-src 'self' https://fonts.gstatic.com; " <>
+        "img-src 'self' data: blob:#{extra}; " <>
+        "connect-src 'self'#{extra}; " <>
+        "frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+
+    put_secure_browser_headers(conn, %{"content-security-policy" => csp})
+  end
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
     plug :put_root_layout, html: {LetsChatWeb.Layouts, :root}
     plug :protect_from_forgery
-
-    plug :put_secure_browser_headers, %{
-      "content-security-policy" =>
-        "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' ws: wss:; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
-    }
-
+    plug :put_csp_headers
     plug :load_from_session
   end
 

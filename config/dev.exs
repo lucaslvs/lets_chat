@@ -67,10 +67,18 @@ config :lets_chat, LetsChatWeb.Endpoint,
     ]
   ]
 
+# Extra CSP origins for dev: Vite dev server and LiveDebugger
+config :lets_chat, :csp_extra_origins, ~w[
+  http://localhost:5173
+  ws://localhost:5173
+  http://127.0.0.1:4007
+  ws://127.0.0.1:4007
+]
+
 # Enable dev routes for dashboard and mailbox
 config :lets_chat, dev_routes: true, token_signing_secret: "WQZQ83whpdWX0EUcAt27Y4Ay8oEBm7dB"
 
-config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS
+config :live_vue, vite_host: "http://localhost:5173", ssr_module: LiveVue.SSR.ViteJS, ssr: false
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"

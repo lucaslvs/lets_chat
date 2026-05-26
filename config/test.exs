@@ -29,6 +29,8 @@ config :lets_chat, LetsChatWeb.Endpoint,
 
 config :lets_chat, token_signing_secret: "BYZgzCVzwOUUs/dAiu4epM/bfqRJnumu"
 
+config :live_vue, ssr: false, enable_props_diff: false
+
 # Print only warnings and errors during test
 config :logger, level: :warning
 

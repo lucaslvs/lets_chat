@@ -8,15 +8,15 @@
     "noEmit": true,
     "skipLibCheck": true,
     "paths": {
-      "*": [ "./deps/*", "node_modules/*" ]
+      "*": [ "../deps/*", "node_modules/*" ]
     },
     "strict": true,
     "types": [ "vite/client" ]
   },
   "include": [
-    "./assets/js/**/*",
-    "./assets/vue/**/*",
-    "./lib/lets_chat_web/**/*"
+    "./js/**/*",
+    "./vue/**/*",
+    "../lib/lets_chat_web/**/*"
   ],
   "exclude": [
     "node_modules"

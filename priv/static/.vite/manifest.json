@@ -2,8 +2,7 @@
   "js/app.js": {
     "file": "assets/app.js",
     "src": "js/app.js",
-    "isEntry": true,
-    "css": []
+    "isEntry": true
   },
   "css/app.css": {
     "file": "assets/app.css",
