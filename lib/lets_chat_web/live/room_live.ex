@@ -8,7 +8,7 @@ defmodule LetsChatWeb.RoomLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, room: nil, show_sidebar: false)}
+    {:ok, assign(socket, room: nil)}
   end
 
   @impl true
@@ -28,7 +28,12 @@ defmodule LetsChatWeb.RoomLive do
   end
 
   @impl true
-  def handle_event("toggle_sidebar", _params, socket) do
-    {:noreply, assign(socket, show_sidebar: !socket.assigns.show_sidebar)}
+  def render(assigns) do
+    ~H"""
+    <.vue
+      v-component="RoomShell"
+      room={@room}
+    />
+    """
   end
 end

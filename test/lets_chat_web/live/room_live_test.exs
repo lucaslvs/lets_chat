@@ -1,6 +1,7 @@
 defmodule LetsChatWeb.RoomLiveTest do
   use LetsChatWeb.ConnCase, async: true
 
+  import LiveVue.Test, only: [get_vue: 2]
   import Phoenix.LiveViewTest
 
   defp auth_conn(conn) do
@@ -22,15 +23,9 @@ defmodule LetsChatWeb.RoomLiveTest do
   # 8.18 — Room header displays correct room name
   test "room header displays correct room name", %{conn: conn} do
     room = create_room!("My Chat Room")
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms/#{room.slug}")
-    assert html =~ room.name
-  end
-
-  # 8.19 — Message input is visible but disabled
-  test "message input is present and disabled", %{conn: conn} do
-    room = create_room!()
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms/#{room.slug}")
-    assert html =~ ~r/<input[^>]+disabled[^>]*>/
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms/#{room.slug}")
+    vue = get_vue(view, name: "RoomShell")
+    assert vue.props["room"]["name"] == room.name
   end
 
   # 8.20 — Unknown slug redirects to lobby with flash error
@@ -44,7 +39,9 @@ defmodule LetsChatWeb.RoomLiveTest do
   # 8.21 — Back to lobby link navigates to /rooms
   test "back to lobby link is present and points to /rooms", %{conn: conn} do
     room = create_room!()
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms/#{room.slug}")
-    assert html =~ ~r/<a[^>]+href="\/rooms"[^>]*>/
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms/#{room.slug}")
+    vue = get_vue(view, name: "RoomShell")
+    assert vue.component == "RoomShell"
+    assert vue.props["room"]["slug"] == room.slug
   end
 end

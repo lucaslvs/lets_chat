@@ -113,3 +113,12 @@ defmodule LetsChat.Chat.Room do
     )
   end
 end
+
+defimpl LiveVue.Encoder, for: LetsChat.Chat.Room do
+  def encode(room, opts) do
+    LiveVue.Encoder.encode(
+      %{id: room.id, name: room.name, slug: room.slug, inserted_at: room.inserted_at},
+      opts
+    )
+  end
+end

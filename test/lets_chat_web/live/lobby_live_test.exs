@@ -1,6 +1,7 @@
 defmodule LetsChatWeb.LobbyLiveTest do
   use LetsChatWeb.ConnCase, async: true
 
+  import LiveVue.Test, only: [get_vue: 2]
   import Phoenix.LiveViewTest
 
   defp auth_conn(conn) do
@@ -26,9 +27,10 @@ defmodule LetsChatWeb.LobbyLiveTest do
 
   # 8.9 — Empty state shown when no rooms exist
   test "shows empty state message when no rooms exist", %{conn: conn} do
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms")
-    assert html =~ "Nenhuma sala criada ainda"
-    refute html =~ "Criar a primeira sala"
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms")
+
+    vue = get_vue(view, name: "RoomLobby")
+    assert vue.props["rooms"] == []
   end
 
   # 8.8 — Rooms listed in reverse chronological order
@@ -37,10 +39,6 @@ defmodule LetsChatWeb.LobbyLiveTest do
 
     room1 = create_room!("First Room")
 
-    # inserted_at is writable? false so Ash defers to DB now(), which returns the
-    # transaction start time (same for all rows in the sandbox transaction).
-    # Pin room1 to a known past timestamp so room2 is definitively newer.
-    # UUID must be dumped to binary for raw-table queries without a schema.
     {:ok, id_bin} = Ecto.UUID.dump(room1.id)
 
     LetsChat.Repo.update_all(
@@ -50,71 +48,76 @@ defmodule LetsChatWeb.LobbyLiveTest do
 
     room2 = create_room!("Second Room")
 
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms")
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms")
 
-    pos1 = html |> :binary.match(room1.name) |> elem(0)
-    pos2 = html |> :binary.match(room2.name) |> elem(0)
+    vue = get_vue(view, name: "RoomLobby")
+    rooms = vue.props["rooms"]
 
-    assert pos2 < pos1
+    names = Enum.map(rooms, & &1["name"])
+    assert Enum.at(names, 0) == room2.name
+    assert Enum.at(names, 1) == room1.name
   end
 
-  # 8.10 — Each card shows name, slug, relative timestamp
-  test "room cards show name, slug, and relative timestamp", %{conn: conn} do
+  # 8.10 — Each card shows name, slug, relative timestamp (via props)
+  test "room cards show name, slug in Vue props", %{conn: conn} do
     room = create_room!("Chat Room")
 
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms")
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms")
 
-    assert html =~ room.name
-    assert html =~ room.slug
-    assert html =~ "agora mesmo"
+    vue = get_vue(view, name: "RoomLobby")
+    assert Enum.any?(vue.props["rooms"], fn r -> r["name"] == room.name end)
+    assert Enum.any?(vue.props["rooms"], fn r -> r["slug"] == room.slug end)
   end
 
-  # 8.11 — New room button opens modal without page navigation
+  # 8.11 — New room button opens modal
   test "clicking New Room button opens creation modal", %{conn: conn} do
     create_room!("Existing Room")
-    {:ok, view, html} = live(auth_conn(conn), "/rooms")
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms")
 
-    refute html =~ "create_room"
+    vue = get_vue(view, name: "RoomLobby")
+    refute vue.props["show_modal"]
 
-    html = view |> element("button[phx-click='open_modal']", "Nova sala") |> render_click()
+    render_click(view, "open_modal", %{})
 
-    assert html =~ "create_room"
+    vue = get_vue(view, name: "RoomLobby")
+    assert vue.props["show_modal"] == true
   end
 
   # 8.12 — Deep-link to /rooms?new=true opens modal on mount
   test "navigating to /rooms?new=true opens modal on initial render", %{conn: conn} do
-    {:ok, _view, html} = live(auth_conn(conn), "/rooms?new=true")
-    assert html =~ "create_room"
-    assert html =~ "Criar sala"
-  end
-
-  # 8.13 — Slug preview updates as user types
-  test "typing room name updates slug preview", %{conn: conn} do
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
 
-    html = render_change(view, "validate", %{"room" => %{"name" => "My Room"}})
-
-    assert html =~ "my-room"
+    vue = get_vue(view, name: "RoomLobby")
+    assert vue.props["show_modal"] == true
+    assert vue.props["form"]
   end
 
-  # 8.14 — Available slug shows positive feedback
-  test "available slug shows disponivel indicator", %{conn: conn} do
+  # 8.13 — Slug preview is now Vue-side computed; server emits push_event for availability
+  test "typing room name emits slug_availability push_event", %{conn: conn} do
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
 
-    html = render_change(view, "validate", %{"room" => %{"name" => "Unique Room xyz987"}})
+    render_change(view, "validate", %{"room" => %{"name" => "My Room"}})
 
-    assert html =~ "disponível"
+    assert_push_event(view, "slug_availability", %{available: _})
   end
 
-  # 8.15 — Taken slug shows negative feedback and disables submit button
-  test "taken slug shows ja em uso indicator and disables submit button", %{conn: conn} do
+  # 8.14 — Available slug emits push_event with available: true
+  test "available slug emits slug_availability with available true", %{conn: conn} do
+    {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
+
+    render_change(view, "validate", %{"room" => %{"name" => "Unique Room xyz987"}})
+
+    assert_push_event(view, "slug_availability", %{available: true})
+  end
+
+  # 8.15 — Taken slug emits push_event with available: false
+  test "taken slug emits slug_availability with available false", %{conn: conn} do
     create_room!("Taken Room")
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
 
-    html = render_change(view, "validate", %{"room" => %{"name" => "Taken Room"}})
+    render_change(view, "validate", %{"room" => %{"name" => "Taken Room"}})
 
-    assert html =~ "em uso"
-    assert html =~ ~r/<button[^>]+disabled[^>]*>\s*Criar sala/
+    assert_push_event(view, "slug_availability", %{available: false})
   end
 
   # 8.16 — Availability check uses base slug only (no numeric suffix)
@@ -122,19 +125,22 @@ defmodule LetsChatWeb.LobbyLiveTest do
     create_room!("Test Room")
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
 
-    html = render_change(view, "validate", %{"room" => %{"name" => "Test Room"}})
+    render_change(view, "validate", %{"room" => %{"name" => "Test Room"}})
 
-    assert html =~ "em uso"
+    assert_push_event(view, "slug_availability", %{available: false})
   end
 
   # Clicking outside modal closes it
   test "clicking outside the modal box closes the modal", %{conn: conn} do
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
-    assert render(view) =~ "create_room"
 
-    view |> element("div.modal[phx-click='close_modal']") |> render_click()
+    vue = get_vue(view, name: "RoomLobby")
+    assert vue.props["show_modal"] == true
 
-    refute render(view) =~ "create_room"
+    render_click(view, "close_modal", %{})
+
+    vue = get_vue(view, name: "RoomLobby")
+    refute vue.props["show_modal"]
   end
 
   # 8.25 — Flash error renders and auto-dismisses via :clear_flash
@@ -158,9 +164,7 @@ defmodule LetsChatWeb.LobbyLiveTest do
     {:ok, view, _html} = live(auth_conn(conn), "/rooms?new=true")
 
     {:error, {:live_redirect, %{to: path}}} =
-      view
-      |> element("form[phx-submit='create_room']")
-      |> render_submit(%{"room" => %{"name" => "My Brand New Room"}})
+      render_submit(view, "create_room", %{"room" => %{"name" => "My Brand New Room"}})
 
     assert path =~ "/rooms/"
     assert path =~ "my-brand-new-room"

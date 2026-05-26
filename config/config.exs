@@ -47,7 +47,7 @@ config :lets_chat,
   ash_domains: [LetsChat.Accounts, LetsChat.Chat],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
-config :live_vue, ssr: true, shared_props: []
+config :live_vue, ssr: true, shared_props: [:current_user, :current_guest]
 
 # Configure Elixir's Logger
 config :logger, :default_formatter,

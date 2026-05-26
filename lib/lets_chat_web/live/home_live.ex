@@ -20,7 +20,6 @@ defmodule LetsChatWeb.HomeLive do
 
       {:ok,
        assign(socket,
-         name: "",
          return_to: return_to,
          error: nil,
          guest_session_id: guest_session_id
@@ -29,8 +28,8 @@ defmodule LetsChatWeb.HomeLive do
   end
 
   @impl true
-  def handle_event("validate", %{"name" => name}, socket) do
-    {:noreply, assign(socket, name: name, error: nil)}
+  def handle_event("validate", _params, socket) do
+    {:noreply, assign(socket, error: nil)}
   end
 
   def handle_event("submit", %{"name" => name}, socket) do
@@ -47,6 +46,18 @@ defmodule LetsChatWeb.HomeLive do
 
       {:noreply, redirect(socket, to: ~p"/session/guest?#{query}")}
     end
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.vue
+      v-component="GuestOnboarding"
+      return_to={@return_to}
+      guest_session_id={@guest_session_id}
+      error={@error}
+    />
+    """
   end
 
   defp validate_return_to(return_to) do

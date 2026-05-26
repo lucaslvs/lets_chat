@@ -3,6 +3,7 @@ defmodule LetsChatWeb.LobbyLive do
   use LetsChatWeb, :live_view
 
   alias LetsChat.Chat.Room
+  alias Phoenix.HTML.Form
 
   on_mount {LetsChatWeb.LiveUserAuth, :require_guest_name}
 
@@ -14,9 +15,7 @@ defmodule LetsChatWeb.LobbyLive do
      assign(socket,
        rooms: [],
        show_modal: false,
-       form: nil,
-       slug_preview: nil,
-       slug_available: nil
+       form: new_form()
      )}
   end
 
@@ -28,15 +27,13 @@ defmodule LetsChatWeb.LobbyLive do
       |> Ash.read!(authorize?: false)
 
     show_modal = Map.get(params, "new") == "true"
-    form = if show_modal, do: new_form()
+    form = new_form()
 
     {:noreply,
      assign(socket,
        rooms: rooms,
        show_modal: show_modal,
-       form: form,
-       slug_preview: nil,
-       slug_available: nil
+       form: form
      )}
   end
 
@@ -45,9 +42,7 @@ defmodule LetsChatWeb.LobbyLive do
     {:noreply,
      assign(socket,
        show_modal: true,
-       form: new_form(),
-       slug_preview: nil,
-       slug_available: nil
+       form: new_form()
      )}
   end
 
@@ -55,9 +50,7 @@ defmodule LetsChatWeb.LobbyLive do
     {:noreply,
      assign(socket,
        show_modal: false,
-       form: nil,
-       slug_preview: nil,
-       slug_available: nil
+       form: new_form()
      )}
   end
 
@@ -65,22 +58,25 @@ defmodule LetsChatWeb.LobbyLive do
     inner = Map.get(params, "room", %{})
     name = Map.get(inner, "name", "")
 
-    slug_preview =
+    slug =
       case Slug.slugify(name) do
         "" -> nil
         nil -> nil
-        slug -> slug
+        s -> s
       end
 
-    slug_available =
-      if slug_preview, do: slug_available?(slug_preview)
+    available = if slug, do: slug_available?(slug)
 
-    form =
-      if socket.assigns.form do
-        socket.assigns.form |> AshPhoenix.Form.validate(inner) |> to_form()
+    form = socket.assigns.form |> AshPhoenix.Form.validate(inner) |> normalize_form()
+
+    socket =
+      if slug do
+        push_event(socket, "slug_availability", %{available: available})
+      else
+        socket
       end
 
-    {:noreply, assign(socket, form: form, slug_preview: slug_preview, slug_available: slug_available)}
+    {:noreply, assign(socket, form: form)}
   end
 
   def handle_event("create_room", params, socket) do
@@ -88,10 +84,10 @@ defmodule LetsChatWeb.LobbyLive do
 
     case AshPhoenix.Form.submit(socket.assigns.form, params: inner) do
       {:ok, room} ->
-        {:noreply, push_navigate(socket, to: ~p"/rooms/#{room.slug}")}
+        {:reply, %{reset: true}, push_navigate(socket, to: ~p"/rooms/#{room.slug}")}
 
       {:error, form} ->
-        {:noreply, assign(socket, form: to_form(form))}
+        {:noreply, assign(socket, form: normalize_form(form))}
     end
   end
 
@@ -103,7 +99,31 @@ defmodule LetsChatWeb.LobbyLive do
   defp new_form do
     Room
     |> AshPhoenix.Form.for_create(:create, domain: LetsChat.Chat, as: "room")
-    |> to_form()
+    |> normalize_form()
+  end
+
+  # LiveVue.Encoder for Phoenix.HTML.Form calls Map.merge(form.data, ...) which crashes
+  # when form.data is nil (AshPhoenix create forms have no pre-existing record).
+  defp normalize_form(%Form{} = form) do
+    %{form | data: form.data || %{}}
+  end
+
+  defp normalize_form(ash_form) do
+    ash_form |> to_form() |> normalize_form()
+  end
+
+  @impl true
+  def render(assigns) do
+    ~H"""
+    <.flash kind={:info} flash={@flash} />
+    <.flash kind={:error} flash={@flash} />
+    <.vue
+      v-component="RoomLobby"
+      rooms={@rooms}
+      form={@form}
+      show_modal={@show_modal}
+    />
+    """
   end
 
   defp slug_available?(slug) do
@@ -111,16 +131,5 @@ defmodule LetsChatWeb.LobbyLive do
       Ash.Query.filter_input(Room, %{slug: slug}),
       authorize?: false
     )
-  end
-
-  defp time_ago(dt) do
-    diff = DateTime.diff(DateTime.utc_now(), dt, :second)
-
-    cond do
-      diff < 60 -> "agora mesmo"
-      diff < 3600 -> "#{div(diff, 60)} min atrás"
-      diff < 86_400 -> "#{div(diff, 3600)}h atrás"
-      true -> "#{div(diff, 86_400)} dias atrás"
-    end
   end
 end
