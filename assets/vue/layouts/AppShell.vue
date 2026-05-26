@@ -1,12 +1,12 @@
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    currentUser?: unknown
-    currentGuest?: unknown
+    current_user?: unknown
+    current_guest?: unknown
   }>(),
   {
-    currentUser: null,
-    currentGuest: null,
+    current_user: null,
+    current_guest: null,
   }
 )
 </script>

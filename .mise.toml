@@ -9,16 +9,20 @@ KERL_BUILD_DOCS = "yes"
 ERL_AFLAGS = "-kernel shell_history enabled"
 
 [tasks.setup]
+description = "Install deps, create and migrate the database"
 run = "mix setup"
 
 [tasks.server]
+description = "Start the Phoenix dev server"
 run = "mix phx.server"
 
 [tasks.test]
+description = "Run ExUnit tests"
 run = "mix test"
 
 [tasks.precommit]
-run = "mix precommit"
+description = "Run full quality check: compile, format, ExUnit and Vitest"
+run = ["mix precommit", "npm test --prefix assets"]
 
 [hooks]
 postinstall = "mix deps.get"

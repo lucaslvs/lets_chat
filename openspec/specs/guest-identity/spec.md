@@ -32,6 +32,8 @@ The system SHALL collect a display name from a new visitor and persist a minimal
 ### Requirement: Avatar computation from name
 The system SHALL compute a visual avatar for every participant entirely from their display name at render time. Avatars SHALL consist of up to 2 initials extracted from the name and a background color chosen deterministically from the DaisyUI semantic color palette using `:erlang.phash2/2`. Avatar data SHALL NOT be stored in the session or database.
 
+On the onboarding form (`GuestOnboarding.vue`), avatar preview SHALL be computed as a Vue `computed` property derived from the local name input `ref`, with no server round-trip. The initials and color logic in Vue SHALL mirror the server-side `avatar_initials/1` and `avatar_color/1` helper behavior.
+
 #### Scenario: Single-word name produces one initial
 - **WHEN** the display name is a single word (e.g. "Alice")
 - **THEN** the avatar SHALL display the first letter in uppercase ("A")
@@ -44,9 +46,9 @@ The system SHALL compute a visual avatar for every participant entirely from the
 - **WHEN** the avatar color is computed for a given name on any render, on any node
 - **THEN** the resulting DaisyUI color token SHALL be identical across renders
 
-#### Scenario: Avatar preview updates live during input
-- **WHEN** a user types in the name field on the onboarding form
-- **THEN** the avatar preview SHALL update on every keystroke to reflect the current initials and color, without a page reload
+#### Scenario: Avatar preview updates live during input without server round-trip
+- **WHEN** a user types in the name field on the onboarding form (`GuestOnboarding.vue`)
+- **THEN** the avatar preview SHALL update on every keystroke via Vue computed (no `phx-change` event required for the avatar update itself), reflecting current initials and color
 
 ---
 
@@ -106,7 +108,7 @@ The system SHALL protect all `/rooms/*` routes by requiring a guest name or auth
 | Single-word name produces one initial | ExUnit (unit) | `CoreComponentsTest` | `avatar_initials("Alice") == "A"` |
 | Multi-word name produces two initials | ExUnit (unit) | `CoreComponentsTest` | `avatar_initials("Alice Smith") == "AS"` |
 | Same name always yields same color | ExUnit (unit) | `CoreComponentsTest` | Call `avatar_color/1` multiple times with the same input; assert identical output |
-| Avatar preview updates live during input | LiveViewTest | `HomeLiveTest` | Send `phx-change` "validate" event with typed name; assert avatar component reflects updated initials |
+| Avatar preview updates live during input without server round-trip | LiveViewTest | `HomeLiveTest` | Verify Vue component receives no `name` prop from server (local state); avatar updates are behavioral via Vue computed |
 
 ### Requirement: Authenticated user identity upgrade
 

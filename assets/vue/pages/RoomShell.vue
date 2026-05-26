@@ -10,13 +10,13 @@ type Room = {
 withDefaults(
   defineProps<{
     room?: Room | null
-    currentUser?: unknown
-    currentGuest?: unknown
+    current_user?: unknown
+    current_guest?: unknown
   }>(),
   {
     room: null,
-    currentUser: null,
-    currentGuest: null,
+    current_user: null,
+    current_guest: null,
   }
 )
 </script>

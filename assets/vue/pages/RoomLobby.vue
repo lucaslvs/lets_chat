@@ -42,14 +42,14 @@ const props = withDefaults(
     rooms: Room[]
     form: Form<RoomFields>
     show_modal: boolean
-    currentUser?: unknown
-    currentGuest?: unknown
+    current_user?: unknown
+    current_guest?: unknown
   }>(),
   {
     rooms: () => [],
     show_modal: false,
-    currentUser: null,
-    currentGuest: null,
+    current_user: null,
+    current_guest: null,
   }
 )
 
